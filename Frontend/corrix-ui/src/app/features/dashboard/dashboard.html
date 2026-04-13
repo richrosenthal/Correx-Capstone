@@ -1,0 +1,29 @@
+<section class="cx-page">
+  <div class="cx-page-header">
+    <h1 class="cx-page-title">CAPA Dashboard</h1>
+    <p class="cx-page-subtitle">Real-time CAPA status</p>
+  </div>
+
+  <div class="cx-card">
+    <p *ngIf="errorMessage" style="color: var(--cx-overdue);">{{ errorMessage }}</p>
+
+    <div class="cx-kpi-grid" *ngIf="summary">
+      <div class="cx-kpi kpi-open">
+        <div class="cx-kpi-label">Open</div>
+        <div class="cx-kpi-value">{{ summary.openCount }}</div>
+      </div>
+      <div class="cx-kpi kpi-overdue">
+        <div class="cx-kpi-label">Overdue</div>
+        <div class="cx-kpi-value">{{ summary.overdueCount }}</div>
+      </div>
+      <div class="cx-kpi kpi-due-soon">
+        <div class="cx-kpi-label">Due Soon</div>
+        <div class="cx-kpi-value">{{ summary.dueSoonCount }}</div>
+      </div>
+      <div class="cx-kpi kpi-closed">
+        <div class="cx-kpi-label">Closed</div>
+        <div class="cx-kpi-value">{{ summary.closedCount }}</div>
+      </div>
+    </div>
+  </div>
+</section>

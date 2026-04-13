@@ -1,0 +1,25 @@
+<div class="cx-login-wrap">
+  <div class="cx-login-box">
+    <div class="cx-login-brand">Corr<span>ix</span></div>
+    <div class="cx-login-tagline">CAPA Management System — Sign in to continue</div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="cx-login-field">
+        <label class="cx-login-label" for="username">Username</label>
+        <input class="cx-login-input" id="username" type="text"
+               formControlName="username" placeholder="Enter your username" />
+      </div>
+      <div class="cx-login-field">
+        <label class="cx-login-label" for="password">Password</label>
+        <input class="cx-login-input" id="password" type="password"
+               formControlName="password" placeholder="Enter your password" />
+      </div>
+
+      <p *ngIf="errorMessage" style="color: var(--cx-overdue); font-size: 13px; margin-top: 8px;">
+        {{ errorMessage }}
+      </p>
+
+      <button class="cx-login-btn" type="submit" [disabled]="loginForm.invalid">Sign In</button>
+    </form>
+  </div>
+</div>

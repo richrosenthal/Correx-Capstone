@@ -1,0 +1,61 @@
+<section class="cx-page">
+  <div class="cx-page-header">
+    <h1 class="cx-page-title">CAPAs</h1>
+    <p class="cx-page-subtitle">CAPA list and search</p>
+  </div>
+
+  <div class="cx-card">
+    <div class="cx-toolbar">
+      <input #searchBox class="cx-input" type="text" placeholder="Search CAPAs..."
+             (keyup.enter)="searchCapas(searchBox.value)" />
+      <button class="cx-btn" (click)="searchCapas(searchBox.value)">Search</button>
+      <button class="cx-btn" (click)="searchBox.value=''; loadCapas()">Clear</button>
+      <div style="flex: 1;"></div>
+      <button class="cx-btn cx-btn-primary" routerLink="/capas/new">+ New CAPA</button>
+    </div>
+
+    <p *ngIf="isLoading">Loading CAPAs...</p>
+
+    <table class="cx-table" *ngIf="!isLoading && capas.length > 0">
+      <thead>
+      <tr>
+        <th>CAPA #</th>
+        <th>Title</th>
+        <th>Status</th>
+        <th>Severity</th>
+        <th>Owner</th>
+        <th>Due Date</th>
+        <th></th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let capa of capas">
+        <td>{{ capa.capaNumber }}</td>
+        <td><a class="cx-link" [routerLink]="['/capas', capa.id]">{{ capa.title }}</a></td>
+        <td>
+            <span class="cx-badge"
+                  [class.cx-badge-open]="capa.status === 'Open'"
+                  [class.cx-badge-overdue]="capa.status === 'Overdue'"
+                  [class.cx-badge-closed]="capa.status === 'Closed'"
+                  [class.cx-badge-due-soon]="capa.status === 'Due Soon'">
+              {{ capa.status }}
+            </span>
+        </td>
+        <td>
+            <span class="cx-sev"
+                  [class.sev-high]="capa.severity === 'High'"
+                  [class.sev-medium]="capa.severity === 'Medium'"
+                  [class.sev-low]="capa.severity === 'Low'">
+              <span class="cx-sev-dot"></span>{{ capa.severity }}
+            </span>
+        </td>
+        <td>{{ capa.owner }}</td>
+        <td class="cx-mono">{{ capa.dueDate }}</td>
+        <td><a class="cx-edit-link" [routerLink]="['/capas', capa.id, 'edit']">Edit</a></td>
+      </tr>
+      </tbody>
+    </table>
+
+    <p *ngIf="!isLoading && capas.length === 0">No CAPAs found.</p>
+  </div>
+</section>

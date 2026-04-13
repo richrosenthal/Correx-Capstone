@@ -1,0 +1,59 @@
+<section class="cx-page">
+  <div class="cx-page-header">
+    <h1 class="cx-page-title">{{ reportTitle || 'Open CAPA Aging Report' }}</h1>
+  </div>
+
+  <div class="cx-card">
+    <p *ngIf="isLoading">Loading report...</p>
+    <p *ngIf="!isLoading && errorMessage">{{ errorMessage }}</p>
+
+    <p class="cx-report-meta" *ngIf="generatedAt">
+      Generated: {{ generatedAt | date:'medium' }}
+    </p>
+
+    <table class="cx-table" *ngIf="!isLoading && rows.length > 0">
+      <thead>
+      <tr>
+        <th>CAPA #</th>
+        <th>Title</th>
+        <th>Status</th>
+        <th>Severity</th>
+        <th>Owner</th>
+        <th>Due Date</th>
+        <th>Days Open</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let row of rows">
+        <td>{{ row.capaNumber }}</td>
+        <td>{{ row.title }}</td>
+        <td>
+            <span class="cx-badge"
+                  [class.cx-badge-open]="row.status === 'Open'"
+                  [class.cx-badge-overdue]="row.status === 'Overdue'"
+                  [class.cx-badge-closed]="row.status === 'Closed'">
+              {{ row.status }}
+            </span>
+        </td>
+        <td>
+            <span class="cx-sev"
+                  [class.sev-high]="row.severity === 'High'"
+                  [class.sev-medium]="row.severity === 'Medium'"
+                  [class.sev-low]="row.severity === 'Low'">
+              <span class="cx-sev-dot"></span>{{ row.severity }}
+            </span>
+        </td>
+        <td>{{ row.owner }}</td>
+        <td class="cx-mono">{{ row.dueDate }}</td>
+        <td class="cx-mono"
+            [class.days-open-high]="row.daysOpen > 14"
+            [class.days-open-warn]="row.daysOpen > 0 && row.daysOpen <= 14">
+          {{ row.daysOpen }}
+        </td>
+      </tr>
+      </tbody>
+    </table>
+
+    <p *ngIf="!isLoading && rows.length === 0 && !errorMessage">No report rows found.</p>
+  </div>
+</section>

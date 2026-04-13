@@ -1,0 +1,126 @@
+/*.page {*/
+/*  background: white;*/
+/*  border: 1px solid #e5e7eb;*/
+/*  border-radius: 12px;*/
+/*  padding: 24px;*/
+/*  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);*/
+
+/*}*/
+
+/*h1 {*/
+/*  margin-top: 0;*/
+/*}*/
+.cx-capa-id {
+  font-family:    var(--mono);
+  font-size:      13px;
+  color:          var(--cx-text-muted);
+  background:     var(--cx-bg);
+  border:         1px solid var(--cx-border);
+  border-radius:  3px;
+  padding:        2px 7px;
+  display:        inline-block;
+  margin-bottom:  4px;
+}
+
+.cx-capa-title-large {
+  font-size:     18px;
+  font-weight:   600;
+  color:         var(--cx-text);
+  margin-bottom: 14px;
+}
+
+.cx-detail-grid {
+  display:               grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:                   12px;
+  margin:                16px 0 24px;
+
+  @media (max-width: 600px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.cx-detail-label {
+  font-size:      10px;
+  font-weight:    600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color:          var(--cx-text-subtle);
+  margin-bottom:  3px;
+}
+
+.cx-detail-value {
+  font-size:   14px;
+  font-weight: 500;
+  color:       var(--cx-text);
+
+  &.mono {
+    font-family: var(--mono);
+    font-size:   13px;
+  }
+}
+
+.cx-section-label {
+  font-size:      11px;
+  font-weight:    600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color:          var(--cx-text-muted);
+  margin-bottom:  10px;
+  padding-bottom: 6px;
+  border-bottom:  1px solid var(--cx-border);
+}
+
+.cx-description-block {
+  background:    var(--cx-bg);
+  border:        1px solid var(--cx-border);
+  border-radius: 4px;
+  padding:       12px 14px;
+  font-size:     13px;
+  color:         var(--cx-text);
+  line-height:   1.6;
+  margin-bottom: 24px;
+}
+
+/* Add Action Item form row*/
+.cx-add-form {
+  background:            var(--cx-bg);
+  border:                1px solid var(--cx-border);
+  border-radius:         6px;
+  padding:               16px;
+  display:               grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr auto;
+  gap:                   8px;
+  align-items:           end;
+  margin-bottom:         16px;
+
+  @media (max-width: 700px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.cx-form-field {
+  label {
+    display:        block;
+    font-size:      11px;
+    font-weight:    600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color:          var(--cx-text-muted);
+    margin-bottom:  4px;
+  }
+}
+
+/* CAPA detail bottom action bar*/
+.cx-detail-actions {
+  display:    flex;
+  gap:        8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--cx-border);
+  flex-wrap:  wrap;
+
+  /* Push Delete to the right*/
+  .cx-btn-danger {
+    margin-left: auto;
+  }
+}

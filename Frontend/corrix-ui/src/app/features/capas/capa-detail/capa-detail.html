@@ -1,0 +1,115 @@
+<section class="cx-page">
+  <div class="cx-page-header">
+    <h1 class="cx-page-title">CAPA Detail</h1>
+  </div>
+
+  <p *ngIf="isLoading">Loading CAPA...</p>
+  <p *ngIf="!isLoading && errorMessage">{{ errorMessage }}</p>
+
+  <div class="cx-card" *ngIf="!isLoading && capa">
+
+    <div class="cx-capa-id">{{ capa.capaNumber }}</div>
+    <div class="cx-capa-title-large">{{ capa.title }}</div>
+
+    <div class="cx-detail-grid">
+      <div>
+        <div class="cx-detail-label">Status</div>
+        <div class="cx-detail-value">
+          <span class="cx-badge"
+                [class.cx-badge-open]="capa.status === 'Open'"
+                [class.cx-badge-overdue]="capa.status === 'Overdue'"
+                [class.cx-badge-closed]="capa.status === 'Closed'"
+                [class.cx-badge-due-soon]="capa.status === 'Due Soon'">
+            {{ capa.status }}
+          </span>
+        </div>
+      </div>
+      <div>
+        <div class="cx-detail-label">Severity</div>
+        <div class="cx-detail-value">
+          <span class="cx-sev"
+                [class.sev-high]="capa.severity === 'High'"
+                [class.sev-medium]="capa.severity === 'Medium'"
+                [class.sev-low]="capa.severity === 'Low'">
+            <span class="cx-sev-dot"></span>{{ capa.severity }}
+          </span>
+        </div>
+      </div>
+      <div>
+        <div class="cx-detail-label">Owner</div>
+        <div class="cx-detail-value">{{ capa.owner }}</div>
+      </div>
+      <div>
+        <div class="cx-detail-label">Due Date</div>
+        <div class="cx-detail-value mono">{{ capa.dueDate }}</div>
+      </div>
+    </div>
+
+    <div class="cx-section-label">Description</div>
+    <div class="cx-description-block">{{ capa.description }}</div>
+
+    <div class="cx-section-label">Action Items</div>
+    <p *ngIf="actionItems.length === 0">No action items found.</p>
+    <table class="cx-table" *ngIf="actionItems.length > 0">
+      <thead>
+      <tr>
+        <th>Title</th>
+        <th>Status</th>
+        <th>Assignee</th>
+        <th>Due Date</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let item of actionItems">
+        <td>{{ item.title }}</td>
+        <td>
+            <span class="cx-badge"
+                  [class.cx-badge-open]="item.status === 'Open'"
+                  [class.cx-badge-closed]="item.status === 'Closed'">
+              {{ item.status }}
+            </span>
+        </td>
+        <td>{{ item.assignee }}</td>
+        <td class="cx-mono">{{ item.dueDate }}</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <div class="cx-section-label" style="margin-top: 24px;">Add Action Item</div>
+    <form [formGroup]="actionItemForm" (ngSubmit)="onAddActionItem()" class="cx-add-form">
+      <div class="cx-form-field">
+        <label for="actionTitle">Title</label>
+        <input class="cx-input cx-input-full" id="actionTitle"
+               type="text" formControlName="title" />
+      </div>
+      <div class="cx-form-field">
+        <label for="actionStatus">Status</label>
+        <select class="cx-select" id="actionStatus" formControlName="statusId">
+          <option value="">Select Status</option>
+          <option *ngFor="let status of statuses" [ngValue]="status.id">{{ status.name }}</option>
+        </select>
+      </div>
+      <div class="cx-form-field">
+        <label for="actionAssignee">Assignee</label>
+        <select class="cx-select" id="actionAssignee" formControlName="assigneeId">
+          <option value="">Unassigned</option>
+          <option *ngFor="let user of users" [ngValue]="user.id">{{ user.username }}</option>
+        </select>
+      </div>
+      <div class="cx-form-field">
+        <label for="actionDueDate">Due Date</label>
+        <input class="cx-input cx-input-full" id="actionDueDate"
+               type="date" formControlName="dueDate" />
+      </div>
+      <div>
+        <button class="cx-btn cx-btn-primary" type="submit">Add Item</button>
+      </div>
+    </form>
+
+    <div class="cx-detail-actions">
+      <a class="cx-btn cx-btn-primary" [routerLink]="['/capas', capa.id, 'edit']">Edit CAPA</a>
+      <a class="cx-btn" routerLink="/capas">Back</a>
+      <button class="cx-btn cx-btn-danger" (click)="onDelete()">Delete</button>
+    </div>
+  </div>
+</section>

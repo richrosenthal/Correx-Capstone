@@ -1,0 +1,9 @@
+.cx-report-meta {
+  font-size:     12px;
+  color:         var(--cx-text-muted);
+  font-family:   var(--mono);
+  margin-bottom: 16px;
+}
+
+.days-open-high { color: var(--cx-overdue);  font-weight: 600; }
+.days-open-warn { color: var(--cx-due-soon); font-weight: 600; }

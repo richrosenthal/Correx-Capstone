@@ -1,0 +1,86 @@
+.cx-login-wrap {
+  min-height:      100vh;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  background:      var(--cx-navy);
+  padding:         24px;
+}
+
+.cx-login-box {
+  background:    #fff;
+  border-radius: 8px;
+  padding:       36px 40px;
+  width:         380px;
+  max-width:     100%;
+}
+
+.cx-login-brand {
+  font-size:      20px;
+  font-weight:    600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color:          var(--cx-navy);
+  margin-bottom:  4px;
+
+  span {
+    color: var(--cx-accent);
+  }
+}
+
+.cx-login-tagline {
+  font-size:     12px;
+  color:         var(--cx-text-muted);
+  margin-bottom: 28px;
+}
+
+.cx-login-field {
+  margin-bottom: 14px;
+}
+
+.cx-login-label {
+  display:        block;
+  font-size:      11px;
+  font-weight:    600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color:          var(--cx-text-muted);
+  margin-bottom:  5px;
+}
+
+.cx-login-input {
+  width:         100%;
+  height:        38px;
+  padding:       0 12px;
+  border:        1px solid var(--cx-border);
+  border-radius: 4px;
+  font-family:   var(--font);
+  font-size:     14px;
+  outline:       none;
+  transition:    border-color 0.15s, box-shadow 0.15s;
+
+  &:focus {
+    border-color: var(--cx-accent);
+    box-shadow:   0 0 0 2px rgba(29, 127, 203, 0.15);
+  }
+}
+
+.cx-login-btn {
+  width:          100%;
+  height:         40px;
+  background:     var(--cx-accent);
+  border:         none;
+  border-radius:  4px;
+  color:          #fff;
+  font-family:    var(--font);
+  font-size:      14px;
+  font-weight:    600;
+  cursor:         pointer;
+  margin-top:     8px;
+  letter-spacing: 0.03em;
+  transition:     background 0.15s;
+
+  &:hover {
+    background: var(--cx-accent-dim);
+  }
+}
