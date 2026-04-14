@@ -73,6 +73,7 @@ public class CapaService {
     public CapaResponse create(CapaRequest capaRequest) {
         Capa capa = new Capa();
         mapRequestToEntity(capaRequest, capa);
+        syncClosedAt(capa);
         return toResponse(capaRepository.save(capa));
     }
 
@@ -89,6 +90,7 @@ public class CapaService {
         CapaStage currentStage = getCurrentStage(capa);
         mapRequestToEntity(capaRequest, capa);
         validateStageChange(capa, currentStage, getCurrentStage(capa));
+        syncClosedAt(capa);
         return toResponse(capaRepository.save(capa));
     }
 
@@ -100,6 +102,7 @@ public class CapaService {
         }
         validateStageChange(capa, currentStage, targetStage);
         capa.setStage(targetStage);
+        syncClosedAt(capa);
         return toResponse(capaRepository.save(capa));
     }
 
@@ -215,6 +218,8 @@ public class CapaService {
         capa.setTitle(capaRequest.getTitle());
         capa.setDescription(capaRequest.getDescription());
         capa.setDueDate(capaRequest.getDueDate());
+        capa.setRootCauseCategory(capaRequest.getRootCauseCategory());
+        capa.setEffectivenessPassed(capaRequest.getEffectivenessPassed());
         if (capaRequest.getStage() != null) {
             capa.setStage(capaRequest.getStage());
         } else if (capa.getStage() == null) {
@@ -234,6 +239,17 @@ public class CapaService {
             capa.setOwner(null);
         }
     }
+
+    private void syncClosedAt(Capa capa) {
+        if (overdueEscalationService.isCapaClosed(capa)) {
+            if (capa.getClosedAt() == null) {
+                capa.setClosedAt(OffsetDateTime.now());
+            }
+        } else {
+            capa.setClosedAt(null);
+        }
+    }
+
     private CapaResponse toResponse(Capa capa) {
         CapaResponse response = new CapaResponse();
         response.setId(capa.getId());
@@ -245,9 +261,12 @@ public class CapaService {
         response.setSeverity(capa.getSeverity() != null ? capa.getSeverity().getName() : null);
         response.setSourceType(capa.getSourceType() != null ? capa.getSourceType().getName(): null);
         response.setOwner(capa.getOwner() != null ? capa.getOwner().getUsername() : null);
+        response.setRootCauseCategory(capa.getRootCauseCategory());
+        response.setEffectivenessPassed(capa.getEffectivenessPassed());
         response.setDueDate(capa.getDueDate());
         response.setOverdue(overdueEscalationService.isCapaOverdue(capa));
         response.setEscalationStatus(overdueEscalationService.getCapaEscalationStatus(capa).name());
+        response.setClosedAt(capa.getClosedAt());
         response.setCreatedAt(capa.getCreatedAt());
         response.setUpdatedAt(capa.getUpdatedAt());
         return response;

@@ -24,6 +24,11 @@ public class CapaRequest {
 
     private CapaStage stage;
 
+    @Size(max = 100)
+    private String rootCauseCategory;
+
+    private Boolean effectivenessPassed;
+
     @NotNull
     private UUID statusId;
 
@@ -60,6 +65,18 @@ public class CapaRequest {
     }
     public void setStage(CapaStage stage) {
         this.stage = stage;
+    }
+    public String getRootCauseCategory() {
+        return rootCauseCategory;
+    }
+    public void setRootCauseCategory(String rootCauseCategory) {
+        this.rootCauseCategory = rootCauseCategory;
+    }
+    public Boolean getEffectivenessPassed() {
+        return effectivenessPassed;
+    }
+    public void setEffectivenessPassed(Boolean effectivenessPassed) {
+        this.effectivenessPassed = effectivenessPassed;
     }
     public UUID getStatusId() {
         return statusId;

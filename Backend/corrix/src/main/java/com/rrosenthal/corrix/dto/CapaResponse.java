@@ -15,9 +15,12 @@ public class CapaResponse {
     private String severity;
     private String sourceType;
     private String owner;
+    private String rootCauseCategory;
+    private Boolean effectivenessPassed;
     private LocalDate dueDate;
     private boolean overdue;
     private String escalationStatus;
+    private OffsetDateTime closedAt;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
@@ -75,6 +78,18 @@ public class CapaResponse {
     public void setOwner(String owner) {
         this.owner = owner;
     }
+    public String getRootCauseCategory() {
+        return rootCauseCategory;
+    }
+    public void setRootCauseCategory(String rootCauseCategory) {
+        this.rootCauseCategory = rootCauseCategory;
+    }
+    public Boolean getEffectivenessPassed() {
+        return effectivenessPassed;
+    }
+    public void setEffectivenessPassed(Boolean effectivenessPassed) {
+        this.effectivenessPassed = effectivenessPassed;
+    }
     public LocalDate getDueDate() {
         return dueDate;
     }
@@ -92,6 +107,12 @@ public class CapaResponse {
     }
     public void setEscalationStatus(String escalationStatus) {
         this.escalationStatus = escalationStatus;
+    }
+    public OffsetDateTime getClosedAt() {
+        return closedAt;
+    }
+    public void setClosedAt(OffsetDateTime closedAt) {
+        this.closedAt = closedAt;
     }
     public OffsetDateTime getCreatedAt() {
         return createdAt;

@@ -33,6 +33,15 @@ public class Capa extends WorkItem {
     @JoinColumn(name = "owner_id")
     private User owner;
 
+    @Column(length = 100)
+    private String rootCauseCategory;
+
+    @Column
+    private Boolean effectivenessPassed;
+
+    @Column
+    private OffsetDateTime closedAt;
+
     @PrePersist
     public void prePersist(){
         if (getId() == null){
@@ -85,6 +94,24 @@ public class Capa extends WorkItem {
     }
     public void setOwner(User owner) {
         this.owner = owner;
+    }
+    public String getRootCauseCategory() {
+        return rootCauseCategory;
+    }
+    public void setRootCauseCategory(String rootCauseCategory) {
+        this.rootCauseCategory = rootCauseCategory;
+    }
+    public Boolean getEffectivenessPassed() {
+        return effectivenessPassed;
+    }
+    public void setEffectivenessPassed(Boolean effectivenessPassed) {
+        this.effectivenessPassed = effectivenessPassed;
+    }
+    public OffsetDateTime getClosedAt() {
+        return closedAt;
+    }
+    public void setClosedAt(OffsetDateTime closedAt) {
+        this.closedAt = closedAt;
     }
 
 }
