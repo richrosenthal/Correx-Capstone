@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient} from '@angular/common/http';
-
+import { ActionItem } from '../models/action-item';
 
 
 @Injectable({
@@ -11,10 +11,19 @@ export class ActionItemService {
   private baseUrl = '/api/action-items';
 
   getByCapaId(capaId: string){
-    return this.http.get<any[]>(`${this.baseUrl}/capa/${capaId}`);
+    return this.http.get<ActionItem[]>(`${this.baseUrl}/capa/${capaId}`);
   }
-  createActionItem(payload: any){
-    return this.http.post<any>(this.baseUrl, payload);
+  createActionItem(payload: {
+    capaId: string;
+    title: string;
+    description?: string | null;
+    statusId: string;
+    ownerId?: string | null;
+    dueDate?: string | null;
+    completedDate?: string | null;
+    evidenceNotes?: string | null;
+  }){
+    return this.http.post<ActionItem>(this.baseUrl, payload);
   }
 
 }

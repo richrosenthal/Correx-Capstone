@@ -1,15 +1,47 @@
 <section class="cx-page">
   <div class="cx-page-header">
     <h1 class="cx-page-title">CAPA Detail</h1>
+    <p class="cx-page-subtitle">Progress the record stage by stage.</p>
   </div>
 
   <p *ngIf="isLoading">Loading CAPA...</p>
-  <p *ngIf="!isLoading && errorMessage">{{ errorMessage }}</p>
+  <p *ngIf="!isLoading && errorMessage" class="cx-inline-error">{{ errorMessage }}</p>
 
   <div class="cx-card" *ngIf="!isLoading && capa">
+    <div class="cx-header-band">
+      <div>
+        <div class="cx-capa-id">{{ capa.capaNumber }}</div>
+        <div class="cx-capa-title-large">{{ capa.title }}</div>
+      </div>
 
-    <div class="cx-capa-id">{{ capa.capaNumber }}</div>
-    <div class="cx-capa-title-large">{{ capa.title }}</div>
+      <div class="cx-stage-panel">
+        <div class="cx-detail-label">Current Stage</div>
+        <div class="cx-stage-current">{{ stageLabels[currentStage] }}</div>
+        <div class="cx-stage-summary">{{ stageSummary }}</div>
+        <button
+          *ngIf="nextStage"
+          class="cx-btn cx-btn-primary"
+          type="button"
+          (click)="onAdvanceStage()"
+          [disabled]="isTransitioning"
+        >
+          {{ isTransitioning ? 'Advancing...' : 'Move to ' + stageLabels[nextStage] }}
+        </button>
+      </div>
+    </div>
+
+    <div class="cx-stage-track">
+      <div
+        *ngFor="let stage of stages"
+        class="cx-stage-chip"
+        [class.is-complete]="isStageComplete(stage)"
+        [class.is-current]="isStageCurrent(stage)"
+        [class.is-upcoming]="!isStageUnlocked(stage)"
+      >
+        <span class="cx-stage-dot"></span>
+        {{ stageLabels[stage] }}
+      </div>
+    </div>
 
     <div class="cx-detail-grid">
       <div>
@@ -17,7 +49,7 @@
         <div class="cx-detail-value">
           <span class="cx-badge"
                 [class.cx-badge-open]="capa.status === 'Open'"
-                [class.cx-badge-overdue]="capa.status === 'Overdue'"
+                [class.cx-badge-overdue]="capa.status === 'Overdue' || capa.overdue"
                 [class.cx-badge-closed]="capa.status === 'Closed'"
                 [class.cx-badge-due-soon]="capa.status === 'Due Soon'">
             {{ capa.status }}
@@ -36,80 +68,158 @@
         </div>
       </div>
       <div>
+        <div class="cx-detail-label">Source</div>
+        <div class="cx-detail-value">{{ capa.sourceType || 'Not set' }}</div>
+      </div>
+      <div>
         <div class="cx-detail-label">Owner</div>
-        <div class="cx-detail-value">{{ capa.owner }}</div>
+        <div class="cx-detail-value">{{ capa.owner || 'Unassigned' }}</div>
       </div>
       <div>
         <div class="cx-detail-label">Due Date</div>
-        <div class="cx-detail-value mono">{{ capa.dueDate }}</div>
+        <div class="cx-detail-value">{{ capa.dueDate || 'Not set' }}</div>
+      </div>
+      <div>
+        <div class="cx-detail-label">Escalation</div>
+        <div class="cx-detail-value">
+          <span class="cx-pill" [class.is-alert]="capa.escalationStatus === 'ESCALATED'">
+            {{ capa.escalationStatus === 'ESCALATED' ? 'Escalated' : 'Normal' }}
+          </span>
+        </div>
       </div>
     </div>
 
-    <div class="cx-section-label">Description</div>
-    <div class="cx-description-block">{{ capa.description }}</div>
+    <div class="cx-section-label">Issue Summary</div>
+    <div class="cx-description-block">{{ capa.description || 'No description provided.' }}</div>
 
-    <div class="cx-section-label">Action Items</div>
-    <p *ngIf="actionItems.length === 0">No action items found.</p>
-    <table class="cx-table" *ngIf="actionItems.length > 0">
-      <thead>
-      <tr>
-        <th>Title</th>
-        <th>Status</th>
-        <th>Assignee</th>
-        <th>Due Date</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr *ngFor="let item of actionItems">
-        <td>{{ item.title }}</td>
-        <td>
+    <div class="cx-stage-section" *ngIf="canShowInvestigation">
+      <div class="cx-section-label">Investigation</div>
+      <div class="cx-stage-grid">
+        <div class="cx-stage-field">
+          <div class="cx-detail-label">Root Cause Category</div>
+          <div class="cx-detail-value">{{ capa.rootCauseCategory || 'Not recorded yet' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cx-stage-section" *ngIf="canManageActionItems; else lockedActionPlan">
+      <div class="cx-section-label">Action Plan & Execution</div>
+      <p *ngIf="actionItems.length === 0" class="cx-empty-note">No action items added yet.</p>
+      <table class="cx-table" *ngIf="actionItems.length > 0">
+        <thead>
+        <tr>
+          <th>Title</th>
+          <th>Status</th>
+          <th>Owner</th>
+          <th>Due</th>
+          <th>Completed</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let item of actionItems">
+          <td>
+            <div>{{ item.title }}</div>
+            <div class="cx-row-meta" *ngIf="item.evidenceNotes">{{ item.evidenceNotes }}</div>
+          </td>
+          <td>
             <span class="cx-badge"
-                  [class.cx-badge-open]="item.status === 'Open'"
+                  [class.cx-badge-open]="!item.overdue && item.status !== 'Closed'"
+                  [class.cx-badge-overdue]="item.overdue"
                   [class.cx-badge-closed]="item.status === 'Closed'">
               {{ item.status }}
             </span>
-        </td>
-        <td>{{ item.assignee }}</td>
-        <td class="cx-mono">{{ item.dueDate }}</td>
-      </tr>
-      </tbody>
-    </table>
+            <div class="cx-row-meta" *ngIf="item.escalationStatus === 'ESCALATED'">Escalated</div>
+          </td>
+          <td>{{ item.owner || item.assignee || 'Unassigned' }}</td>
+          <td class="cx-mono">{{ item.dueDate || 'Not set' }}</td>
+          <td class="cx-mono">{{ item.completedDate || 'Open' }}</td>
+        </tr>
+        </tbody>
+      </table>
 
-    <div class="cx-section-label" style="margin-top: 24px;">Add Action Item</div>
-    <form [formGroup]="actionItemForm" (ngSubmit)="onAddActionItem()" class="cx-add-form">
-      <div class="cx-form-field">
-        <label for="actionTitle">Title</label>
-        <input class="cx-input cx-input-full" id="actionTitle"
-               type="text" formControlName="title" />
+      <div class="cx-section-label cx-section-label-inline">Add Action Item</div>
+      <form [formGroup]="actionItemForm" (ngSubmit)="onAddActionItem()" class="cx-add-form">
+        <div class="cx-form-field">
+          <label for="actionTitle">Title</label>
+          <input class="cx-input cx-input-full" id="actionTitle" type="text" formControlName="title" />
+        </div>
+        <div class="cx-form-field">
+          <label for="actionDescription">Description</label>
+          <textarea
+            class="cx-input cx-input-full"
+            id="actionDescription"
+            rows="2"
+            formControlName="description"></textarea>
+        </div>
+        <div class="cx-form-field">
+          <label for="actionStatus">Status</label>
+          <select class="cx-select" id="actionStatus" formControlName="statusId">
+            <option value="">Select status</option>
+            <option *ngFor="let status of statuses" [ngValue]="status.id">{{ status.name }}</option>
+          </select>
+        </div>
+        <div class="cx-form-field">
+          <label for="actionOwner">Owner</label>
+          <select class="cx-select" id="actionOwner" formControlName="ownerId">
+            <option value="">Select owner</option>
+            <option *ngFor="let user of users" [ngValue]="user.id">{{ user.username }}</option>
+          </select>
+        </div>
+        <div class="cx-form-field">
+          <label for="actionDueDate">Due Date</label>
+          <input class="cx-input cx-input-full" id="actionDueDate" type="date" formControlName="dueDate" />
+        </div>
+        <div class="cx-form-field">
+          <label for="actionCompletedDate">Completed Date</label>
+          <input class="cx-input cx-input-full" id="actionCompletedDate" type="date" formControlName="completedDate" />
+        </div>
+        <div class="cx-form-field">
+          <label for="actionEvidenceNotes">Evidence Notes</label>
+          <textarea
+            class="cx-input cx-input-full"
+            id="actionEvidenceNotes"
+            rows="2"
+            formControlName="evidenceNotes"></textarea>
+        </div>
+        <div class="cx-add-action">
+          <button class="cx-btn cx-btn-primary" type="submit">Add Item</button>
+        </div>
+      </form>
+    </div>
+
+    <ng-template #lockedActionPlan>
+      <div class="cx-stage-section">
+        <div class="cx-section-label">Action Plan & Execution</div>
+        <p class="cx-empty-note">Action items unlock when the CAPA reaches Action Plan.</p>
       </div>
-      <div class="cx-form-field">
-        <label for="actionStatus">Status</label>
-        <select class="cx-select" id="actionStatus" formControlName="statusId">
-          <option value="">Select Status</option>
-          <option *ngFor="let status of statuses" [ngValue]="status.id">{{ status.name }}</option>
-        </select>
+    </ng-template>
+
+    <div class="cx-stage-section" *ngIf="canShowEffectiveness">
+      <div class="cx-section-label">Effectiveness Check</div>
+      <div class="cx-stage-grid">
+        <div class="cx-stage-field">
+          <div class="cx-detail-label">Result</div>
+          <div class="cx-detail-value">
+            {{
+              capa.effectivenessPassed === true
+                ? 'Passed'
+                : capa.effectivenessPassed === false
+                  ? 'Failed'
+                  : 'Pending'
+            }}
+          </div>
+        </div>
+        <div class="cx-stage-field" *ngIf="capa.closedAt">
+          <div class="cx-detail-label">Closed At</div>
+          <div class="cx-detail-value cx-mono">{{ capa.closedAt }}</div>
+        </div>
       </div>
-      <div class="cx-form-field">
-        <label for="actionAssignee">Assignee</label>
-        <select class="cx-select" id="actionAssignee" formControlName="assigneeId">
-          <option value="">Unassigned</option>
-          <option *ngFor="let user of users" [ngValue]="user.id">{{ user.username }}</option>
-        </select>
-      </div>
-      <div class="cx-form-field">
-        <label for="actionDueDate">Due Date</label>
-        <input class="cx-input cx-input-full" id="actionDueDate"
-               type="date" formControlName="dueDate" />
-      </div>
-      <div>
-        <button class="cx-btn cx-btn-primary" type="submit">Add Item</button>
-      </div>
-    </form>
+    </div>
 
     <div class="cx-detail-actions">
       <a class="cx-btn cx-btn-primary" [routerLink]="['/capas', capa.id, 'edit']">Edit CAPA</a>
       <a class="cx-btn" routerLink="/capas">Back</a>
-      <button class="cx-btn cx-btn-danger" (click)="onDelete()">Delete</button>
+      <button class="cx-btn cx-btn-danger" type="button" (click)="onDelete()">Delete</button>
     </div>
   </div>
 </section>

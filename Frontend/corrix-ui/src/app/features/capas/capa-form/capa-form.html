@@ -1,68 +1,105 @@
 <section class="cx-page">
   <div class="cx-page-header">
-    <h1 class="cx-page-title">CAPA Form</h1>
-    <p class="cx-page-subtitle">Create and edit CAPAs.</p>
+    <h1 class="cx-page-title">{{ pageTitle }}</h1>
+    <p class="cx-page-subtitle">Maintain the record details for the current workflow stage.</p>
   </div>
 
   <div class="cx-card">
-    <form [formGroup]="capaForm" (ngSubmit)="onSubmit()">
-
-      <div class="cx-form-field" style="margin-bottom: 14px;">
-        <label for="capaNumber">CAPA Number</label>
-        <input class="cx-input cx-input-full" id="capaNumber"
-               type="text" formControlName="capaNumber" />
+    <div class="cx-form-stage-band">
+      <div>
+        <div class="cx-stage-label">Current Stage</div>
+        <div class="cx-stage-value">{{ stageLabels[currentStage] }}</div>
       </div>
-      <div class="cx-form-field" style="margin-bottom: 14px;">
-        <label for="title">Title</label>
-        <input class="cx-input cx-input-full" id="title"
-               type="text" formControlName="title" />
-      </div>
-      <div class="cx-form-field" style="margin-bottom: 14px;">
-        <label for="description">Description</label>
-        <textarea class="cx-input cx-input-full" id="description"
-                  formControlName="description" rows="4"
-                  style="height: auto; padding: 8px 12px;"></textarea>
-      </div>
-      <div class="cx-form-field" style="margin-bottom: 14px;">
-        <label for="statusId">Status</label>
-        <select class="cx-select" id="statusId" formControlName="statusId">
-          <option value="">Select status</option>
-          <option *ngFor="let status of statuses" [value]="status.id">{{ status.name }}</option>
-        </select>
-      </div>
-      <div class="cx-form-field" style="margin-bottom: 14px;">
-        <label for="severityId">Severity</label>
-        <select class="cx-select" id="severityId" formControlName="severityId">
-          <option value="">Select severity</option>
-          <option *ngFor="let severity of severities" [value]="severity.id">{{ severity.name }}</option>
-        </select>
-      </div>
-      <div class="cx-form-field" style="margin-bottom: 14px;">
-        <label for="sourceTypeId">Source Type</label>
-        <select class="cx-select" id="sourceTypeId" formControlName="sourceTypeId">
-          <option value="">Select source type</option>
-          <option *ngFor="let sourceType of sourceTypes" [value]="sourceType.id">{{ sourceType.name }}</option>
-        </select>
-      </div>
-      <div class="cx-form-field" style="margin-bottom: 14px;">
-        <label for="ownerId">Owner</label>
-        <select class="cx-select" id="ownerId" formControlName="ownerId">
-          <option value="">Select owner</option>
-          <option *ngFor="let user of users" [value]="user.id">{{ user.username }}</option>
-        </select>
-      </div>
-      <div class="cx-form-field" style="margin-bottom: 20px;">
-        <label for="dueDate">Due Date</label>
-        <input class="cx-input" id="dueDate" type="date" formControlName="dueDate" />
-      </div>
-
-      <p *ngIf="errorMessage" style="color: var(--cx-overdue); font-size: 13px; margin-bottom: 12px;">
-        {{ errorMessage }}
+      <p class="cx-stage-note" *ngIf="isEditMode">
+        Stage transitions happen from the CAPA detail page.
       </p>
+    </div>
+
+    <form [formGroup]="capaForm" (ngSubmit)="onSubmit()">
+      <div class="cx-form-grid">
+        <div class="cx-form-field cx-span-2">
+          <label for="capaNumber">CAPA Number</label>
+          <input class="cx-input cx-input-full" id="capaNumber" type="text" formControlName="capaNumber" />
+        </div>
+        <div class="cx-form-field cx-span-2">
+          <label for="title">Title</label>
+          <input class="cx-input cx-input-full" id="title" type="text" formControlName="title" />
+        </div>
+        <div class="cx-form-field cx-span-2">
+          <label for="description">Description</label>
+          <textarea
+            class="cx-input cx-input-full"
+            id="description"
+            formControlName="description"
+            rows="4"></textarea>
+        </div>
+        <div class="cx-form-field">
+          <label for="statusId">Status</label>
+          <select class="cx-select" id="statusId" formControlName="statusId">
+            <option value="">Select status</option>
+            <option *ngFor="let status of statuses" [value]="status.id">{{ status.name }}</option>
+          </select>
+        </div>
+        <div class="cx-form-field">
+          <label for="severityId">Severity</label>
+          <select class="cx-select" id="severityId" formControlName="severityId">
+            <option value="">Select severity</option>
+            <option *ngFor="let severity of severities" [value]="severity.id">{{ severity.name }}</option>
+          </select>
+        </div>
+        <div class="cx-form-field">
+          <label for="sourceTypeId">Source Type</label>
+          <select class="cx-select" id="sourceTypeId" formControlName="sourceTypeId">
+            <option value="">Select source type</option>
+            <option *ngFor="let sourceType of sourceTypes" [value]="sourceType.id">{{ sourceType.name }}</option>
+          </select>
+        </div>
+        <div class="cx-form-field">
+          <label for="ownerId">Owner</label>
+          <select class="cx-select" id="ownerId" formControlName="ownerId">
+            <option value="">Select owner</option>
+            <option *ngFor="let user of users" [value]="user.id">{{ user.username }}</option>
+          </select>
+        </div>
+        <div class="cx-form-field">
+          <label for="dueDate">Due Date</label>
+          <input class="cx-input cx-input-full" id="dueDate" type="date" formControlName="dueDate" />
+        </div>
+      </div>
+
+      <div class="cx-stage-form-section" *ngIf="canShowInvestigationFields">
+        <div class="cx-stage-section-title">Investigation</div>
+        <div class="cx-form-grid">
+          <div class="cx-form-field cx-span-2">
+            <label for="rootCauseCategory">Root Cause Category</label>
+            <input
+              class="cx-input cx-input-full"
+              id="rootCauseCategory"
+              type="text"
+              formControlName="rootCauseCategory" />
+          </div>
+        </div>
+      </div>
+
+      <div class="cx-stage-form-section" *ngIf="canShowEffectivenessFields">
+        <div class="cx-stage-section-title">Effectiveness Check</div>
+        <div class="cx-form-grid">
+          <div class="cx-form-field">
+            <label for="effectivenessPassed">Effectiveness Result</label>
+            <select class="cx-select" id="effectivenessPassed" formControlName="effectivenessPassed">
+              <option [ngValue]="null">Pending</option>
+              <option [ngValue]="true">Passed</option>
+              <option [ngValue]="false">Failed</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <p *ngIf="errorMessage" class="cx-inline-error">{{ errorMessage }}</p>
 
       <div class="cx-detail-actions">
-        <button class="cx-btn cx-btn-primary" type="submit" [disabled]="capaForm.invalid">Submit</button>
-        <a class="cx-btn" routerLink="/capas">Cancel</a>
+        <button class="cx-btn cx-btn-primary" type="submit" [disabled]="capaForm.invalid">Save CAPA</button>
+        <a class="cx-btn" [routerLink]="isEditMode && capaId ? ['/capas', capaId] : '/capas'">Cancel</a>
       </div>
     </form>
   </div>
