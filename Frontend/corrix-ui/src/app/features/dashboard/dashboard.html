@@ -1,28 +1,84 @@
 <section class="cx-page">
   <div class="cx-page-header">
     <h1 class="cx-page-title">CAPA Dashboard</h1>
-    <p class="cx-page-subtitle">Real-time CAPA status</p>
+    <p class="cx-page-subtitle">Real-time CAPA performance and execution tracking.</p>
   </div>
 
   <div class="cx-card">
-    <p *ngIf="errorMessage" style="color: var(--cx-overdue);">{{ errorMessage }}</p>
+    <p *ngIf="errorMessage" class="cx-inline-error">{{ errorMessage }}</p>
 
     <div class="cx-kpi-grid" *ngIf="summary">
       <div class="cx-kpi kpi-open">
-        <div class="cx-kpi-label">Open</div>
-        <div class="cx-kpi-value">{{ summary.openCount }}</div>
-      </div>
-      <div class="cx-kpi kpi-overdue">
-        <div class="cx-kpi-label">Overdue</div>
-        <div class="cx-kpi-value">{{ summary.overdueCount }}</div>
-      </div>
-      <div class="cx-kpi kpi-due-soon">
-        <div class="cx-kpi-label">Due Soon</div>
-        <div class="cx-kpi-value">{{ summary.dueSoonCount }}</div>
+        <div class="cx-kpi-label">Open CAPAs</div>
+        <div class="cx-kpi-value">{{ summary.openCapasCount }}</div>
       </div>
       <div class="cx-kpi kpi-closed">
-        <div class="cx-kpi-label">Closed</div>
-        <div class="cx-kpi-value">{{ summary.closedCount }}</div>
+        <div class="cx-kpi-label">Closed This Month</div>
+        <div class="cx-kpi-value">{{ summary.closedCapasThisMonth }}</div>
+      </div>
+      <div class="cx-kpi kpi-overdue">
+        <div class="cx-kpi-label">Overdue CAPAs</div>
+        <div class="cx-kpi-value">{{ summary.overdueCapaCount }}</div>
+      </div>
+      <div class="cx-kpi kpi-action-items">
+        <div class="cx-kpi-label">Overdue Action Items</div>
+        <div class="cx-kpi-value">{{ summary.actionItemOverdueCount }}</div>
+      </div>
+      <div class="cx-kpi kpi-cycle-time">
+        <div class="cx-kpi-label">Average Days To Closure</div>
+        <div class="cx-kpi-value">{{ formatMetric(summary.averageDaysToClosure) }}</div>
+      </div>
+      <div class="cx-kpi kpi-quality">
+        <div class="cx-kpi-label">Effectiveness Pass Rate</div>
+        <div class="cx-kpi-value">{{ formatMetric(summary.effectivenessPassRate, '%') }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cx-dashboard-grid" *ngIf="summary">
+    <div class="cx-card">
+      <div class="cx-section-heading">
+        <div>
+          <h2 class="cx-section-title">CAPAs By Source</h2>
+          <p class="cx-section-subtitle">Current distribution across intake channels.</p>
+        </div>
+      </div>
+
+      <p *ngIf="sourceBreakdown.length === 0" class="cx-empty-note">No source data is available yet.</p>
+
+      <div class="cx-breakdown-list" *ngIf="sourceBreakdown.length > 0">
+        <div class="cx-breakdown-row" *ngFor="let item of sourceBreakdown; trackBy: trackByLabel">
+          <div class="cx-breakdown-header">
+            <span class="cx-breakdown-label">{{ item.label }}</span>
+            <span class="cx-breakdown-count">{{ item.count }}</span>
+          </div>
+          <div class="cx-breakdown-bar-track">
+            <div class="cx-breakdown-bar" [style.width.%]="barWidth(item.count, maxSourceCount)"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cx-card">
+      <div class="cx-section-heading">
+        <div>
+          <h2 class="cx-section-title">CAPAs By Root Cause</h2>
+          <p class="cx-section-subtitle">Simple view of the strongest recurrence themes.</p>
+        </div>
+      </div>
+
+      <p *ngIf="rootCauseBreakdown.length === 0" class="cx-empty-note">No root cause data is available yet.</p>
+
+      <div class="cx-breakdown-list" *ngIf="rootCauseBreakdown.length > 0">
+        <div class="cx-breakdown-row" *ngFor="let item of rootCauseBreakdown; trackBy: trackByLabel">
+          <div class="cx-breakdown-header">
+            <span class="cx-breakdown-label">{{ item.label }}</span>
+            <span class="cx-breakdown-count">{{ item.count }}</span>
+          </div>
+          <div class="cx-breakdown-bar-track">
+            <div class="cx-breakdown-bar cx-breakdown-bar-alt" [style.width.%]="barWidth(item.count, maxRootCauseCount)"></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
