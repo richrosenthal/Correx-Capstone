@@ -46,17 +46,20 @@ public class CapaService {
     private final SeverityRepository severityRepository;
     private final SourceTypeRepository sourceTypeRepository;
     private final UserRepository userRepository;
+    private final CapaStageValidationService capaStageValidationService;
 
     public CapaService(CapaRepository capaRepository,
                        StatusRepository statusRepository,
                        SeverityRepository severityRepository,
                        SourceTypeRepository sourceTypeRepository,
-                       UserRepository userRepository) {
+                       UserRepository userRepository,
+                       CapaStageValidationService capaStageValidationService) {
         this.capaRepository = capaRepository;
         this.statusRepository = statusRepository;
         this.severityRepository = severityRepository;
         this.sourceTypeRepository = sourceTypeRepository;
         this.userRepository = userRepository;
+        this.capaStageValidationService = capaStageValidationService;
     }
 
     public CapaResponse create(CapaRequest capaRequest) {
@@ -75,23 +78,19 @@ public class CapaService {
 
     public CapaResponse update(UUID id, CapaRequest capaRequest) {
         Capa capa = capaRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("CAPA not found"));
+        CapaStage currentStage = getCurrentStage(capa);
         mapRequestToEntity(capaRequest, capa);
+        validateStageChange(capa, currentStage, getCurrentStage(capa));
         return toResponse(capaRepository.save(capa));
     }
 
     public CapaResponse transitionStage(UUID capaId, CapaStage targetStage) {
         Capa capa = capaRepository.findById(capaId).orElseThrow(() -> new ResourceNotFoundException("CAPA not found"));
         CapaStage currentStage = getCurrentStage(capa);
-
         if (currentStage == targetStage) {
             throw new InvalidStageTransitionException("CAPA is already in stage " + targetStage.name());
         }
-
-        Set<CapaStage> allowedTargets = ALLOWED_STAGE_TRANSITIONS.getOrDefault(currentStage, EnumSet.noneOf(CapaStage.class));
-        if (!allowedTargets.contains(targetStage)) {
-            throw new InvalidStageTransitionException(buildInvalidTransitionMessage(currentStage, targetStage, allowedTargets));
-        }
-
+        validateStageChange(capa, currentStage, targetStage);
         capa.setStage(targetStage);
         return toResponse(capaRepository.save(capa));
     }
@@ -179,6 +178,19 @@ public class CapaService {
         }
         return "Cannot transition CAPA from " + currentStage.name() + " to " + targetStage.name() + ". Allowed target stage(s): "
                 + allowedTargets.stream().map(Enum::name).toList();
+    }
+
+    private void validateStageChange(Capa capa, CapaStage currentStage, CapaStage targetStage) {
+        if (currentStage == targetStage) {
+            return;
+        }
+
+        Set<CapaStage> allowedTargets = ALLOWED_STAGE_TRANSITIONS.getOrDefault(currentStage, EnumSet.noneOf(CapaStage.class));
+        if (!allowedTargets.contains(targetStage)) {
+            throw new InvalidStageTransitionException(buildInvalidTransitionMessage(currentStage, targetStage, allowedTargets));
+        }
+
+        capaStageValidationService.validateForStage(capa, targetStage);
     }
 
     private void mapRequestToEntity(CapaRequest capaRequest, Capa capa) {
