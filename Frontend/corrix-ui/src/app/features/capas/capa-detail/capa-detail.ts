@@ -4,7 +4,7 @@ import { NgForOf, NgIf } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { CapaService } from '../../../core/services/capa';
-import { ActionItemService } from '../../../core/services/action-item';
+import { ActionItemService, ActionItemWritePayload } from '../../../core/services/action-item';
 import { LookupService } from '../../../core/services/lookup';
 
 import { Capa } from '../../../core/models/capa';
@@ -41,11 +41,24 @@ export class CapaDetail implements OnInit {
   isLoading = true;
   isTransitioning = false;
   errorMessage = '';
+  actionItemErrorMessage = '';
   actionItems: ActionItem[] = [];
   statuses: Status[] = [];
   users: UserLookup[] = [];
+  editingActionItemId: string | null = null;
+  isSavingActionItem = false;
 
   actionItemForm = this.fb.group({
+    title: ['', Validators.required],
+    description: [''],
+    statusId: ['', Validators.required],
+    ownerId: ['', Validators.required],
+    dueDate: ['', Validators.required],
+    completedDate: [''],
+    evidenceNotes: [''],
+  });
+
+  editActionItemForm = this.fb.group({
     title: ['', Validators.required],
     description: [''],
     statusId: ['', Validators.required],
@@ -137,10 +150,13 @@ export class CapaDetail implements OnInit {
     this.actionItemService.getByCapaId(capaId).subscribe({
       next: (data) => {
         this.actionItems = data;
+        if (this.editingActionItemId && !data.some((item) => item.id === this.editingActionItemId)) {
+          this.cancelEditActionItem();
+        }
         this.cdr.detectChanges();
       },
       error: () => {
-        this.errorMessage = 'Failed to load action items.';
+        this.actionItemErrorMessage = 'Failed to load action items.';
       },
     });
   }
@@ -201,31 +217,107 @@ export class CapaDetail implements OnInit {
       return;
     }
 
-    const payload = {
-      capaId: this.capa.id,
-      title: this.actionItemForm.value.title ?? '',
-      description: this.actionItemForm.value.description ?? '',
-      statusId: this.actionItemForm.value.statusId ?? '',
-      ownerId: this.actionItemForm.value.ownerId || null,
-      dueDate: this.actionItemForm.value.dueDate || null,
-      completedDate: this.actionItemForm.value.completedDate || null,
-      evidenceNotes: this.actionItemForm.value.evidenceNotes || null,
-    };
+    this.actionItemErrorMessage = '';
+    this.isSavingActionItem = true;
+    const payload = this.buildActionItemPayload(this.actionItemForm.getRawValue(), this.capa.id);
 
     this.actionItemService.createActionItem(payload).subscribe({
       next: () => {
         this.actionItemForm.reset();
+        this.isSavingActionItem = false;
         this.loadActionItems(this.capa!.id);
         this.cdr.detectChanges();
       },
       error: (err) => {
-        this.errorMessage = this.readApiError(err, 'Failed to create action item.');
+        this.actionItemErrorMessage = this.readApiError(err, 'Failed to create action item.');
+        this.isSavingActionItem = false;
       },
     });
   }
 
+  startEditActionItem(item: ActionItem): void {
+    this.editingActionItemId = item.id;
+    this.actionItemErrorMessage = '';
+
+    const matchedStatus = this.statuses.find((status) => status.name === item.status);
+    const ownerName = item.owner || item.assignee;
+    const matchedOwner = this.users.find((user) => user.username === ownerName);
+
+    this.editActionItemForm.patchValue({
+      title: item.title ?? '',
+      description: item.description ?? '',
+      statusId: matchedStatus?.id ?? '',
+      ownerId: matchedOwner?.id ?? '',
+      dueDate: item.dueDate ?? '',
+      completedDate: item.completedDate ?? '',
+      evidenceNotes: item.evidenceNotes ?? '',
+    });
+  }
+
+  cancelEditActionItem(): void {
+    this.editingActionItemId = null;
+    this.editActionItemForm.reset();
+    this.actionItemErrorMessage = '';
+  }
+
+  onUpdateActionItem(): void {
+    if (!this.capa?.id || !this.editingActionItemId) {
+      return;
+    }
+
+    if (this.editActionItemForm.invalid) {
+      this.editActionItemForm.markAllAsTouched();
+      return;
+    }
+
+    this.actionItemErrorMessage = '';
+    this.isSavingActionItem = true;
+    const payload = this.buildActionItemPayload(this.editActionItemForm.getRawValue(), this.capa.id);
+
+    this.actionItemService.updateActionItem(this.editingActionItemId, payload).subscribe({
+      next: () => {
+        this.isSavingActionItem = false;
+        this.cancelEditActionItem();
+        this.loadActionItems(this.capa!.id);
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.actionItemErrorMessage = this.readApiError(err, 'Failed to update action item.');
+        this.isSavingActionItem = false;
+      },
+    });
+  }
+
+  isActionItemClosed(item: ActionItem): boolean {
+    return ['closed', 'done', 'completed'].includes(item.status.toLowerCase());
+  }
+
   private stageIndex(stage: CapaStage): number {
     return this.stages.indexOf(stage);
+  }
+
+  private buildActionItemPayload(
+    formValue: {
+      title?: string | null;
+      description?: string | null;
+      statusId?: string | null;
+      ownerId?: string | null;
+      dueDate?: string | null;
+      completedDate?: string | null;
+      evidenceNotes?: string | null;
+    },
+    capaId: string,
+  ): ActionItemWritePayload {
+    return {
+      capaId,
+      title: formValue.title ?? '',
+      description: formValue.description ?? '',
+      statusId: formValue.statusId ?? '',
+      ownerId: formValue.ownerId || null,
+      dueDate: formValue.dueDate || null,
+      completedDate: formValue.completedDate || null,
+      evidenceNotes: formValue.evidenceNotes || null,
+    };
   }
 
   private readApiError(err: any, fallback: string): string {

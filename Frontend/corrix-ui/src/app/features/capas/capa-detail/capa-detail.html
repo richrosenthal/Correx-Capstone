@@ -104,36 +104,108 @@
 
     <div class="cx-stage-section" *ngIf="canManageActionItems; else lockedActionPlan">
       <div class="cx-section-label">Action Plan & Execution</div>
+      <p *ngIf="actionItemErrorMessage" class="cx-inline-error">{{ actionItemErrorMessage }}</p>
       <p *ngIf="actionItems.length === 0" class="cx-empty-note">No action items added yet.</p>
       <table class="cx-table" *ngIf="actionItems.length > 0">
         <thead>
         <tr>
           <th>Title</th>
-          <th>Status</th>
           <th>Owner</th>
-          <th>Due</th>
-          <th>Completed</th>
+          <th>Status</th>
+          <th>Due Date</th>
+          <th>Overdue</th>
+          <th>Evidence Notes</th>
+          <th></th>
         </tr>
         </thead>
         <tbody>
-        <tr *ngFor="let item of actionItems">
-          <td>
-            <div>{{ item.title }}</div>
-            <div class="cx-row-meta" *ngIf="item.evidenceNotes">{{ item.evidenceNotes }}</div>
-          </td>
-          <td>
-            <span class="cx-badge"
-                  [class.cx-badge-open]="!item.overdue && item.status !== 'Closed'"
-                  [class.cx-badge-overdue]="item.overdue"
-                  [class.cx-badge-closed]="item.status === 'Closed'">
-              {{ item.status }}
-            </span>
-            <div class="cx-row-meta" *ngIf="item.escalationStatus === 'ESCALATED'">Escalated</div>
-          </td>
-          <td>{{ item.owner || item.assignee || 'Unassigned' }}</td>
-          <td class="cx-mono">{{ item.dueDate || 'Not set' }}</td>
-          <td class="cx-mono">{{ item.completedDate || 'Open' }}</td>
-        </tr>
+        <ng-container *ngFor="let item of actionItems">
+          <tr>
+            <td>
+              <div>{{ item.title }}</div>
+              <div class="cx-row-meta" *ngIf="item.description">{{ item.description }}</div>
+              <div class="cx-row-meta" *ngIf="item.completedDate">Completed {{ item.completedDate }}</div>
+            </td>
+            <td>{{ item.owner || item.assignee || 'Unassigned' }}</td>
+            <td>
+              <span class="cx-badge"
+                    [class.cx-badge-open]="!item.overdue && !isActionItemClosed(item)"
+                    [class.cx-badge-overdue]="item.overdue"
+                    [class.cx-badge-closed]="isActionItemClosed(item)">
+                {{ item.status }}
+              </span>
+            </td>
+            <td class="cx-mono">{{ item.dueDate || 'Not set' }}</td>
+            <td>
+              <span class="cx-pill" [class.is-alert]="item.overdue">
+                {{ item.overdue ? 'Overdue' : 'On Track' }}
+              </span>
+              <div class="cx-row-meta" *ngIf="item.escalationStatus === 'ESCALATED'">Escalated</div>
+            </td>
+            <td>
+              <div>{{ item.evidenceNotes || 'No evidence yet' }}</div>
+            </td>
+            <td class="cx-table-actions">
+              <button class="cx-btn cx-btn-small" type="button" (click)="startEditActionItem(item)">
+                Edit
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="editingActionItemId === item.id" class="cx-edit-row">
+            <td colspan="7">
+              <form [formGroup]="editActionItemForm" (ngSubmit)="onUpdateActionItem()" class="cx-add-form cx-edit-form">
+                <div class="cx-form-field">
+                  <label [for]="'editTitle-' + item.id">Title</label>
+                  <input class="cx-input cx-input-full" [id]="'editTitle-' + item.id" type="text" formControlName="title" />
+                </div>
+                <div class="cx-form-field">
+                  <label [for]="'editDescription-' + item.id">Description</label>
+                  <textarea
+                    class="cx-input cx-input-full"
+                    [id]="'editDescription-' + item.id"
+                    rows="2"
+                    formControlName="description"></textarea>
+                </div>
+                <div class="cx-form-field">
+                  <label [for]="'editStatus-' + item.id">Status</label>
+                  <select class="cx-select" [id]="'editStatus-' + item.id" formControlName="statusId">
+                    <option value="">Select status</option>
+                    <option *ngFor="let status of statuses" [ngValue]="status.id">{{ status.name }}</option>
+                  </select>
+                </div>
+                <div class="cx-form-field">
+                  <label [for]="'editOwner-' + item.id">Owner</label>
+                  <select class="cx-select" [id]="'editOwner-' + item.id" formControlName="ownerId">
+                    <option value="">Select owner</option>
+                    <option *ngFor="let user of users" [ngValue]="user.id">{{ user.username }}</option>
+                  </select>
+                </div>
+                <div class="cx-form-field">
+                  <label [for]="'editDueDate-' + item.id">Due Date</label>
+                  <input class="cx-input cx-input-full" [id]="'editDueDate-' + item.id" type="date" formControlName="dueDate" />
+                </div>
+                <div class="cx-form-field">
+                  <label [for]="'editCompletedDate-' + item.id">Completed Date</label>
+                  <input class="cx-input cx-input-full" [id]="'editCompletedDate-' + item.id" type="date" formControlName="completedDate" />
+                </div>
+                <div class="cx-form-field">
+                  <label [for]="'editEvidence-' + item.id">Evidence Notes</label>
+                  <textarea
+                    class="cx-input cx-input-full"
+                    [id]="'editEvidence-' + item.id"
+                    rows="2"
+                    formControlName="evidenceNotes"></textarea>
+                </div>
+                <div class="cx-edit-actions">
+                  <button class="cx-btn cx-btn-primary" type="submit" [disabled]="isSavingActionItem">
+                    {{ isSavingActionItem ? 'Saving...' : 'Save Changes' }}
+                  </button>
+                  <button class="cx-btn" type="button" (click)="cancelEditActionItem()">Cancel</button>
+                </div>
+              </form>
+            </td>
+          </tr>
+        </ng-container>
         </tbody>
       </table>
 
@@ -182,7 +254,9 @@
             formControlName="evidenceNotes"></textarea>
         </div>
         <div class="cx-add-action">
-          <button class="cx-btn cx-btn-primary" type="submit">Add Item</button>
+          <button class="cx-btn cx-btn-primary" type="submit" [disabled]="isSavingActionItem">
+            {{ isSavingActionItem ? 'Saving...' : 'Add Item' }}
+          </button>
         </div>
       </form>
     </div>
