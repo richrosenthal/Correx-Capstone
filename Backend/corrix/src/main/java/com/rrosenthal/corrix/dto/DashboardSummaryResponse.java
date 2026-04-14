@@ -6,6 +6,9 @@ public class DashboardSummaryResponse {
     private long overdueCount;
     private long dueSoonCount;
     private long closedCount;
+    private long capaEscalatedCount;
+    private long actionItemOverdueCount;
+    private long actionItemEscalatedCount;
 
     public long getOpenCount() {
         return openCount;
@@ -30,5 +33,23 @@ public class DashboardSummaryResponse {
     }
     public void setDueSoonCount(long dueSoonCount) {
         this.dueSoonCount = dueSoonCount;
+    }
+    public long getCapaEscalatedCount() {
+        return capaEscalatedCount;
+    }
+    public void setCapaEscalatedCount(long capaEscalatedCount) {
+        this.capaEscalatedCount = capaEscalatedCount;
+    }
+    public long getActionItemOverdueCount() {
+        return actionItemOverdueCount;
+    }
+    public void setActionItemOverdueCount(long actionItemOverdueCount) {
+        this.actionItemOverdueCount = actionItemOverdueCount;
+    }
+    public long getActionItemEscalatedCount() {
+        return actionItemEscalatedCount;
+    }
+    public void setActionItemEscalatedCount(long actionItemEscalatedCount) {
+        this.actionItemEscalatedCount = actionItemEscalatedCount;
     }
 }

@@ -7,9 +7,11 @@ import com.rrosenthal.corrix.dto.CapaResponse;
 import com.rrosenthal.corrix.dto.DashboardSummaryResponse;
 import com.rrosenthal.corrix.entity.Capa;
 import com.rrosenthal.corrix.entity.CapaStage;
+import com.rrosenthal.corrix.entity.EscalationStatus;
 import com.rrosenthal.corrix.entity.User;
 import com.rrosenthal.corrix.exception.InvalidStageTransitionException;
 import com.rrosenthal.corrix.exception.ResourceNotFoundException;
+import com.rrosenthal.corrix.repository.ActionItemRepository;
 import com.rrosenthal.corrix.repository.CapaRepository;
 import com.rrosenthal.corrix.repository.SeverityRepository;
 import com.rrosenthal.corrix.repository.SourceTypeRepository;
@@ -42,24 +44,30 @@ public class CapaService {
     );
 
     private final CapaRepository capaRepository;
+    private final ActionItemRepository actionItemRepository;
     private final StatusRepository statusRepository;
     private final SeverityRepository severityRepository;
     private final SourceTypeRepository sourceTypeRepository;
     private final UserRepository userRepository;
     private final CapaStageValidationService capaStageValidationService;
+    private final OverdueEscalationService overdueEscalationService;
 
     public CapaService(CapaRepository capaRepository,
+                       ActionItemRepository actionItemRepository,
                        StatusRepository statusRepository,
                        SeverityRepository severityRepository,
                        SourceTypeRepository sourceTypeRepository,
                        UserRepository userRepository,
-                       CapaStageValidationService capaStageValidationService) {
+                       CapaStageValidationService capaStageValidationService,
+                       OverdueEscalationService overdueEscalationService) {
         this.capaRepository = capaRepository;
+        this.actionItemRepository = actionItemRepository;
         this.statusRepository = statusRepository;
         this.severityRepository = severityRepository;
         this.sourceTypeRepository = sourceTypeRepository;
         this.userRepository = userRepository;
         this.capaStageValidationService = capaStageValidationService;
+        this.overdueEscalationService = overdueEscalationService;
     }
 
     public CapaResponse create(CapaRequest capaRequest) {
@@ -112,26 +120,39 @@ public class CapaService {
 
     public DashboardSummaryResponse getDashboardSummary() {
         List<Capa> capas = capaRepository.findAll();
+        List<com.rrosenthal.corrix.entity.ActionItem> actionItems = actionItemRepository.findAll();
+        long actionItemOverdueCount = actionItems.stream()
+                .filter(overdueEscalationService::isActionItemOverdue)
+                .count();
+        long actionItemEscalatedCount = actionItems.stream()
+                .filter(actionItem -> overdueEscalationService.getActionItemEscalationStatus(actionItem) == EscalationStatus.ESCALATED)
+                .count();
         LocalDate today = LocalDate.now();
 
-        long openCount = capas.stream().filter(c -> !isClosed(c)).count();
+        long openCount = capas.stream().filter(c -> !overdueEscalationService.isCapaClosed(c)).count();
 
-        long overdueCount = capas.stream().filter(c -> !isClosed(c)).filter(c -> c.getDueDate() != null && c.getDueDate().isBefore(today)).count();
+        long overdueCount = capas.stream().filter(overdueEscalationService::isCapaOverdue).count();
 
         long dueSoonCount = capas.stream()
-                .filter(c -> !isClosed(c))
+                .filter(c -> !overdueEscalationService.isCapaClosed(c))
                 .filter(c -> c.getDueDate() != null
                 && !c.getDueDate().isBefore(today)
                 && !c.getDueDate().isAfter(today.plusDays(7))).count();
 
 
-        long closedCount = capas.stream().filter(this::isClosed).count();
+        long closedCount = capas.stream().filter(overdueEscalationService::isCapaClosed).count();
+        long capaEscalatedCount = capas.stream()
+                .filter(capa -> overdueEscalationService.getCapaEscalationStatus(capa) == EscalationStatus.ESCALATED)
+                .count();
 
         DashboardSummaryResponse dashboardSummaryResponse = new DashboardSummaryResponse();
         dashboardSummaryResponse.setOpenCount(openCount);
         dashboardSummaryResponse.setOverdueCount(overdueCount);
         dashboardSummaryResponse.setClosedCount(closedCount);
         dashboardSummaryResponse.setDueSoonCount(dueSoonCount);
+        dashboardSummaryResponse.setCapaEscalatedCount(capaEscalatedCount);
+        dashboardSummaryResponse.setActionItemOverdueCount(actionItemOverdueCount);
+        dashboardSummaryResponse.setActionItemEscalatedCount(actionItemEscalatedCount);
         return dashboardSummaryResponse;
     }
 
@@ -139,7 +160,7 @@ public class CapaService {
         LocalDate today = LocalDate.now();
 
         List<AgingReportRowResponse> rows = capaRepository.findAll().stream()
-                .filter(c -> !isClosed(c))
+                .filter(c -> !overdueEscalationService.isCapaClosed(c))
                 .map(c ->{
             AgingReportRowResponse row = new AgingReportRowResponse();
             row.setCapaNumber(c.getCapaNumber());
@@ -162,10 +183,6 @@ public class CapaService {
         rowResponse.setGeneratedAt(OffsetDateTime.now());
         rowResponse.setRows(rows);
         return rowResponse;
-    }
-
-    private boolean isClosed(Capa capa){
-        return capa.getStatus() != null && capa.getStatus().getName() != null && capa.getStatus().getName().equalsIgnoreCase("Closed");
     }
 
     private CapaStage getCurrentStage(Capa capa) {
@@ -229,6 +246,8 @@ public class CapaService {
         response.setSourceType(capa.getSourceType() != null ? capa.getSourceType().getName(): null);
         response.setOwner(capa.getOwner() != null ? capa.getOwner().getUsername() : null);
         response.setDueDate(capa.getDueDate());
+        response.setOverdue(overdueEscalationService.isCapaOverdue(capa));
+        response.setEscalationStatus(overdueEscalationService.getCapaEscalationStatus(capa).name());
         response.setCreatedAt(capa.getCreatedAt());
         response.setUpdatedAt(capa.getUpdatedAt());
         return response;

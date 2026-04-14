@@ -16,6 +16,8 @@ public class CapaResponse {
     private String sourceType;
     private String owner;
     private LocalDate dueDate;
+    private boolean overdue;
+    private String escalationStatus;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
@@ -78,6 +80,18 @@ public class CapaResponse {
     }
     public void setDueDate(LocalDate dueDate) {
         this.dueDate = dueDate;
+    }
+    public boolean isOverdue() {
+        return overdue;
+    }
+    public void setOverdue(boolean overdue) {
+        this.overdue = overdue;
+    }
+    public String getEscalationStatus() {
+        return escalationStatus;
+    }
+    public void setEscalationStatus(String escalationStatus) {
+        this.escalationStatus = escalationStatus;
     }
     public OffsetDateTime getCreatedAt() {
         return createdAt;

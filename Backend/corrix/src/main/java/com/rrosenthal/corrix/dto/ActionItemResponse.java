@@ -17,6 +17,8 @@ public class ActionItemResponse {
     private LocalDate dueDate;
     private LocalDate completedDate;
     private String evidenceNotes;
+    private boolean overdue;
+    private String escalationStatus;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
@@ -79,6 +81,18 @@ public class ActionItemResponse {
     }
     public void setEvidenceNotes(String evidenceNotes) {
         this.evidenceNotes = evidenceNotes;
+    }
+    public boolean isOverdue() {
+        return overdue;
+    }
+    public void setOverdue(boolean overdue) {
+        this.overdue = overdue;
+    }
+    public String getEscalationStatus() {
+        return escalationStatus;
+    }
+    public void setEscalationStatus(String escalationStatus) {
+        this.escalationStatus = escalationStatus;
     }
     public OffsetDateTime getCreatedAt() {
         return createdAt;

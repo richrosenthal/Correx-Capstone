@@ -24,17 +24,20 @@ public class ActionItemService {
     private final UserRepository userRepository;
     private final StatusRepository statusRepository;
     private final ActionItemValidationService actionItemValidationService;
+    private final OverdueEscalationService overdueEscalationService;
 
     public ActionItemService(ActionItemRepository actionItemRepository,
                              CapaRepository capaRepository,
                              UserRepository userRepository,
                              StatusRepository statusRepository,
-                             ActionItemValidationService actionItemValidationService) {
+                             ActionItemValidationService actionItemValidationService,
+                             OverdueEscalationService overdueEscalationService) {
         this.actionItemRepository = actionItemRepository;
         this.capaRepository = capaRepository;
         this.userRepository = userRepository;
         this.statusRepository = statusRepository;
         this.actionItemValidationService = actionItemValidationService;
+        this.overdueEscalationService = overdueEscalationService;
     }
 
     public ActionItemResponse create(ActionItemRequest actionItemRequest) {
@@ -95,6 +98,8 @@ public class ActionItemService {
         response.setDueDate(actionItem.getDueDate());
         response.setCompletedDate(actionItem.getCompletedDate());
         response.setEvidenceNotes(actionItem.getEvidenceNotes());
+        response.setOverdue(overdueEscalationService.isActionItemOverdue(actionItem));
+        response.setEscalationStatus(overdueEscalationService.getActionItemEscalationStatus(actionItem).name());
         response.setCreatedAt(actionItem.getCreatedAt());
         response.setUpdatedAt(actionItem.getUpdatedAt());
         return response;
