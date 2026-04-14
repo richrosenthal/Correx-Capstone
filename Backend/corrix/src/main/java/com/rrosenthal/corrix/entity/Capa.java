@@ -13,6 +13,10 @@ public class Capa extends WorkItem {
     @Column(nullable = false, unique = true, length =50)
     private String capaNumber;
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 50)
+    private CapaStage stage;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "status_id")
     private Status status;
@@ -34,6 +38,9 @@ public class Capa extends WorkItem {
         if (getId() == null){
             setId(UUID.randomUUID());
         }
+        if (stage == null) {
+            stage = CapaStage.DRAFT;
+        }
         OffsetDateTime now =  OffsetDateTime.now();
         setCreatedAt(now);
         setUpdatedAt(now);
@@ -48,6 +55,12 @@ public class Capa extends WorkItem {
     }
     public void setCapaNumber(String capaNumber) {
         this.capaNumber = capaNumber;
+    }
+    public CapaStage getStage() {
+        return stage;
+    }
+    public void setStage(CapaStage stage) {
+        this.stage = stage;
     }
     public Status getStatus() {
         return status;

@@ -1,5 +1,6 @@
 package com.rrosenthal.corrix.dto;
 
+import com.rrosenthal.corrix.entity.CapaStage;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -20,6 +21,8 @@ public class CapaRequest {
 
     @Size(max = 2000)
     private String description;
+
+    private CapaStage stage;
 
     @NotNull
     private UUID statusId;
@@ -51,6 +54,12 @@ public class CapaRequest {
     }
     public void setDescription(String description) {
         this.description = description;
+    }
+    public CapaStage getStage() {
+        return stage;
+    }
+    public void setStage(CapaStage stage) {
+        this.stage = stage;
     }
     public UUID getStatusId() {
         return statusId;

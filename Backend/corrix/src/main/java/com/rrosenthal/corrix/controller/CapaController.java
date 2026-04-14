@@ -2,6 +2,7 @@ package com.rrosenthal.corrix.controller;
 
 import com.rrosenthal.corrix.dto.CapaRequest;
 import com.rrosenthal.corrix.dto.CapaResponse;
+import com.rrosenthal.corrix.dto.CapaStageTransitionRequest;
 import com.rrosenthal.corrix.service.CapaService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -42,6 +43,11 @@ public class CapaController {
     @PutMapping("/{id}")
     public CapaResponse update(@PathVariable UUID id, @RequestBody CapaRequest capaRequest) {
         return capaService.update(id, capaRequest);
+    }
+
+    @PatchMapping("/{id}/stage")
+    public CapaResponse transitionStage(@PathVariable UUID id, @Valid @RequestBody CapaStageTransitionRequest request) {
+        return capaService.transitionStage(id, request.getTargetStage());
     }
 
     @DeleteMapping("/{id}")

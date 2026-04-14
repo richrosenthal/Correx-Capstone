@@ -10,6 +10,7 @@ public class CapaResponse {
     private String capaNumber;
     private String title;
     private String description;
+    private String stage;
     private String status;
     private String severity;
     private String sourceType;
@@ -41,6 +42,12 @@ public class CapaResponse {
     }
     public void setDescription(String description) {
         this.description = description;
+    }
+    public String getStage() {
+        return stage;
+    }
+    public void setStage(String stage) {
+        this.stage = stage;
     }
     public String getStatus() {
         return status;
