@@ -22,9 +22,17 @@ public class ActionItemRequest {
     @NotNull
     private UUID statusId;
 
+    private UUID ownerId;
+
     private UUID assigneeId;
 
+    @NotNull
     private LocalDate dueDate;
+
+    private LocalDate completedDate;
+
+    @Size(max = 4000)
+    private String evidenceNotes;
 
     public UUID getCapaId() {
         return capaId;
@@ -50,6 +58,12 @@ public class ActionItemRequest {
     public void setStatusId(UUID statusId) {
         this.statusId = statusId;
     }
+    public UUID getOwnerId() {
+        return ownerId;
+    }
+    public void setOwnerId(UUID ownerId) {
+        this.ownerId = ownerId;
+    }
     public UUID getAssigneeId() {
         return assigneeId;
     }
@@ -61,5 +75,17 @@ public class ActionItemRequest {
     }
     public void setDueDate(LocalDate dueDate) {
         this.dueDate = dueDate;
+    }
+    public LocalDate getCompletedDate() {
+        return completedDate;
+    }
+    public void setCompletedDate(LocalDate completedDate) {
+        this.completedDate = completedDate;
+    }
+    public String getEvidenceNotes() {
+        return evidenceNotes;
+    }
+    public void setEvidenceNotes(String evidenceNotes) {
+        this.evidenceNotes = evidenceNotes;
     }
 }

@@ -12,8 +12,11 @@ public class ActionItemResponse {
     private String title;
     private String description;
     private String status;
+    private String owner;
     private String assignee;
     private LocalDate dueDate;
+    private LocalDate completedDate;
+    private String evidenceNotes;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
@@ -47,6 +50,12 @@ public class ActionItemResponse {
     public void setStatus(String status) {
         this.status = status;
     }
+    public String getOwner() {
+        return owner;
+    }
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
     public String getAssignee() {
         return assignee;
     }
@@ -58,6 +67,18 @@ public class ActionItemResponse {
     }
     public void setDueDate(LocalDate dueDate) {
         this.dueDate = dueDate;
+    }
+    public LocalDate getCompletedDate() {
+        return completedDate;
+    }
+    public void setCompletedDate(LocalDate completedDate) {
+        this.completedDate = completedDate;
+    }
+    public String getEvidenceNotes() {
+        return evidenceNotes;
+    }
+    public void setEvidenceNotes(String evidenceNotes) {
+        this.evidenceNotes = evidenceNotes;
     }
     public OffsetDateTime getCreatedAt() {
         return createdAt;

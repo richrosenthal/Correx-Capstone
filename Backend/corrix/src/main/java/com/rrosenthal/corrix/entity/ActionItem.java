@@ -1,6 +1,7 @@
 package com.rrosenthal.corrix.entity;
 import jakarta.persistence.*;
 import jakarta.persistence.PreUpdate;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -19,6 +20,12 @@ public class ActionItem extends WorkItem {
     @ManyToOne
     @JoinColumn(name = "assignee_id")
     private User assignee;
+
+    @Column
+    private LocalDate completedDate;
+
+    @Column(length = 4000)
+    private String evidenceNotes;
 
     @PrePersist
     public void prePersist(){
@@ -51,5 +58,23 @@ public class ActionItem extends WorkItem {
     }
     public void setAssignee(User assignee) {
         this.assignee = assignee;
+    }
+    public User getOwner() {
+        return assignee;
+    }
+    public void setOwner(User owner) {
+        this.assignee = owner;
+    }
+    public LocalDate getCompletedDate() {
+        return completedDate;
+    }
+    public void setCompletedDate(LocalDate completedDate) {
+        this.completedDate = completedDate;
+    }
+    public String getEvidenceNotes() {
+        return evidenceNotes;
+    }
+    public void setEvidenceNotes(String evidenceNotes) {
+        this.evidenceNotes = evidenceNotes;
     }
 }
