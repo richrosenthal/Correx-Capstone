@@ -6,6 +6,7 @@ import com.rrosenthal.corrix.dto.CapaRequest;
 import com.rrosenthal.corrix.dto.CapaResponse;
 import com.rrosenthal.corrix.dto.DashboardSummaryResponse;
 import com.rrosenthal.corrix.entity.Capa;
+import com.rrosenthal.corrix.entity.CapaStage;
 import com.rrosenthal.corrix.entity.User;
 import com.rrosenthal.corrix.exception.ResourceNotFoundException;
 import com.rrosenthal.corrix.repository.CapaRepository;
@@ -143,6 +144,11 @@ public class CapaService {
         capa.setTitle(capaRequest.getTitle());
         capa.setDescription(capaRequest.getDescription());
         capa.setDueDate(capaRequest.getDueDate());
+        if (capaRequest.getStage() != null) {
+            capa.setStage(capaRequest.getStage());
+        } else if (capa.getStage() == null) {
+            capa.setStage(CapaStage.DRAFT);
+        }
 
         capa.setStatus(statusRepository.findById(capaRequest.getStatusId()).orElseThrow(() -> new ResourceNotFoundException("Status not found")));
 
@@ -163,6 +169,7 @@ public class CapaService {
         response.setCapaNumber(capa.getCapaNumber());
         response.setTitle(capa.getTitle());
         response.setDescription(capa.getDescription());
+        response.setStage(capa.getStage() != null ? capa.getStage().name() : CapaStage.DRAFT.name());
         response.setStatus(capa.getStatus() != null ? capa.getStatus().getName() : null);
         response.setSeverity(capa.getSeverity() != null ? capa.getSeverity().getName() : null);
         response.setSourceType(capa.getSourceType() != null ? capa.getSourceType().getName(): null);

@@ -4,13 +4,23 @@ This project was generated using [Angular CLI](https://github.com/angular/angula
 
 ## Development server
 
-To start a local development server, run:
+This frontend expects the Spring backend to be running locally on `http://localhost:8080`.
+
+1. Start the backend from `Backend/corrix`:
+
+```bash
+./mvnw spring-boot:run
+```
+
+2. In a separate terminal, start the Angular dev server from `Frontend/corrix-ui`:
 
 ```bash
 ng serve
 ```
 
 Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+
+The dev server proxies all `/api/*` requests to the backend, so the Angular app can keep using relative API paths during local development.
 
 ## Code scaffolding
 
